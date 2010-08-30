@@ -19,9 +19,9 @@ function yim_checkinfo($username, $password, $return=array()) {
   if (count($oauth_data) <= 0 || count($session_data) <= 0 || !yim_session_is_valid($oauth_data, $session_data)) {
     $oauth_data = yim_login($username, $password);
     $session_data = yim_create_session();
-    print("PHP session active (" . session_id() . "). Created new Yahoo session with id: " . $session_data->sessionId . "\n\n");
+    logit("PHP session active (" . session_id() . "). Created new Yahoo session with id: " . $session_data->sessionId . "\n\n");
   } else {
-    print("PHP session active (" . session_id() . "). Using Yahoo! session id: " . $session_data->sessionId . "\n\n");
+    logit("PHP session active (" . session_id() . "). Using Yahoo! session id: " . $session_data->sessionId . "\n\n");
   }
   return $session_data ? $session_data : false;
 }
@@ -42,12 +42,7 @@ function yim_session_is_valid($oauth_data, $session_data) {
   $query_param_string = oauth_http_build_query($params);
   $url = $url . '&' . $query_param_string;
   $response = do_get($url);
-  try {
-    yim_fail_if_not_ok($response, 'Session is no longer valid');
-  } catch(Exception $e) {
-    return false;
-  }
-  return true;
+  return yim_is_successful_response($response);
 }
 
 function yim_create_session() {
@@ -56,14 +51,15 @@ function yim_create_session() {
   $oauth_token = $oauth_data['oauth_token'];
   $access_token_secret = $oauth_data['oauth_token_secret'];
   
-  $url = 'http://developer.messenger.yahooapis.com/v1/session?fieldsBuddyList=%2Bgroups';
+  $url = 'http://developer.messenger.yahooapis.com/v1/session';
   
   $params = yim_get_basic_oauth_params();
+  $params['fieldsBuddyList'] = '+groups';
   $params['oauth_token'] = $oauth_token;
   $params['oauth_signature'] = oauth_compute_plaintext_sig(OAUTH_CONSUMER_SECRET, $access_token_secret);
   
   $query_param_string = oauth_http_build_query($params);
-  $url = $url . '&' . $query_param_string;
+  $url = $url . '?' . $query_param_string;
   $headers = array();
   $headers[0] = 'Content-Type: application/json;charset=utf-8';
     
@@ -113,12 +109,7 @@ function yim_logout() {
   $query_param_string = oauth_http_build_query($params);
   $url = $url . '&' . $query_param_string;
   $response = do_delete($url);
-  try {
-    yim_fail_if_not_ok($response, 'Session is no longer valid');
-  } catch(Exception $e) {
-    return false;
-  }
-  return true;  
+  return yim_is_successful_response($response);
 }
 
 function yim_login($username, $password) {

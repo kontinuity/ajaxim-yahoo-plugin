@@ -10,6 +10,11 @@ function yim_get_basic_oauth_params() {
   return $params;
 }
 
+function yim_is_successful_response($response) {
+  $code = $response[0]['http_code'];
+  return ($code == '200');
+}
+
 function yim_fail_if_not_ok($response, $message='An unknown error has occurred') {
   $code = $response[0]['http_code'];
   
@@ -19,5 +24,5 @@ function yim_fail_if_not_ok($response, $message='An unknown error has occurred')
   }
   
 }
-  
+
 ?>

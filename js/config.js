@@ -37,7 +37,7 @@ var pulsateTitles      = true;           // Pulsate (blink) IM window titles on 
 var audioNotify        = true;           // By default, play sounds upon getting an IM?
 
 // Server //
-var pingFrequency      = 2500;           // How often to ping the server (in milliseconds). Best range between 2500 and 3500 ms.
+var pingFrequency      = 60000;           // How often to ping the server (in milliseconds). Best range between 2500 and 3500 ms.
 var pingTo             = 'ajax_im.php';  // The file that is the "server".
 var adminPingTo        = 'admin.php';    // The "server" script for admin functions.
 var blockedBuddyStatus = false;           // Show blocked buddies' status. 

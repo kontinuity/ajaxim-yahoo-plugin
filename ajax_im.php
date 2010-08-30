@@ -167,8 +167,15 @@ class Ajax_IM {
      
       $session_data = $this->checkInfo($username, $password, array('admin', 'banned'));
       if(!$session_data) return 'invalid';
+
+      $buddies_in_group = array();
+      foreach($session_data->contacts as $ct) {
+        $buddies_in_group[] = array("username" => $ct->contact->id, "icon" => "none", "is_online" => "1");
+      }
       
-      $output['buddy'] = $this->json->encode($session_data->contacts);
+      $output['buddy'] = $this->json->encode(array("Buddies" => $buddies_in_group));
+      $output['blocked'] = '[]';
+      $output['admin'] = "0";
       return $this->json->encode($output);
    }
    

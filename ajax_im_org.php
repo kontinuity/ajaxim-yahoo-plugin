@@ -62,8 +62,8 @@ class Ajax_IM {
    function Ajax_IM($call) {
       $this->json = new JSON_obj();
 
-      $this->username = $_SESSION['username'];
-      $this->password = $_SESSION['password'];
+      $this->username = array_key_exists('username', $_SESSION) ? $_SESSION['username'] : '';
+      $this->password = array_key_exists('password', $_SESSION) ? $_SESSION['password'] : '';
       
       // run the garbage collector (chance run)
       $this->gc();
@@ -72,7 +72,7 @@ class Ajax_IM {
       // then execute it and print the output
       switch($call) {
          case 'login':
-            print $this->login(strtolower($_POST['username']), $_POST['password']);
+            print $this->login(strtolower($_POST['username']),$_POST['password']);
          break;
          
          case 'logout':
@@ -719,7 +719,6 @@ class Ajax_IM {
     **/
    function getBuddylist($username, $inc_blocked=true) {
       $username = mysql_real_escape_string($username);
-
       $query = mysql_query('SELECT ' . SQL_PREFIX . 'buddylists.buddy AS buddy, `group` FROM ' . SQL_PREFIX . 'buddylists WHERE user=\'' . $username . '\' AND ' . SQL_PREFIX . 'buddylists.buddy NOT IN(SELECT user FROM ' . SQL_PREFIX . 'blocklists WHERE buddy=\'' . $username . '\')' . ($inc_blocked ? "" : ' AND ' . SQL_PREFIX . 'buddylists.buddy NOT IN(SELECT buddy FROM ' . SQL_PREFIX . 'blocklists WHERE user=\'' . $username . '\')'));
    
       $buddylist = array();
@@ -821,7 +820,7 @@ class Ajax_IM {
          break;
       }
             
-      if(count($to_insert) > 0) {
+      if(isset($to_insert) && count($to_insert) > 0) {
          $time_cur = time();
          foreach($to_insert as $user => $evt)
             $insert_str .= "('" . $evt . "', 'event', '" . $username . "', '" . mysql_real_escape_string($user) . "', " . $time_cur . "),";
