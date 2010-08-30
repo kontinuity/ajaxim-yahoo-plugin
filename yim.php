@@ -10,6 +10,33 @@ function yim_get_buddy_list() {
   
 }
 
+function yim_send_message($to, $message) {
+  
+  $oauth_data = $_SESSION['oauth_data'];
+  $oauth_token = $oauth_data['oauth_token'];
+  $access_token_secret = $oauth_data['oauth_token_secret'];
+  
+  $session_data = $_SESSION['session_data'];
+  
+  $url = 'http://' . $session_data->server . '/v1/message/yahoo/' . $to . '?sid=' . $session_data->sessionId;
+  
+  $params = yim_get_basic_oauth_params();
+  $params['format'] = 'json';
+  $params['oauth_token'] = $oauth_token;
+  $params['oauth_signature'] = oauth_compute_plaintext_sig(OAUTH_CONSUMER_SECRET, $access_token_secret);
+
+  $query_param_string = oauth_http_build_query($params);
+  $url = $url . '&' . $query_param_string;
+  
+  $headers = array();
+  $headers[] = 'Content-Type: application/json;charset=utf-8';
+  
+  $post_body = '{"message" : "' . $message . '"}';
+  $response = do_post($url, $post_body, 80, $headers);
+  
+  return yim_is_successful_response($response);
+}
+
 function yim_checkinfo($username, $password, $return=array()) {
   // Add to refresh token here
   //Should check if session is valid

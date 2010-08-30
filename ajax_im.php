@@ -273,58 +273,12 @@ class Ajax_IM {
     * @author Joshua Gross
     **/
    function send($to, $message, $font, $font_size, $font_color, $bold, $italic, $underline, $is_chat) {
-      $to = mysql_real_escape_string($to);
-      
-      if(!$this->checkInfo($this->username, $this->password)) {
-         $set_status = mysql_query('UPDATE ' . SQL_PREFIX . 'users SET is_online=0, last_ping=\'' . time() . '\' WHERE username=\'' . mysql_real_escape_string($this->username) . '\'');
-         return 'not_logged_in';
-      }
-      
-      $is_online = $this->isOnline($to);
-      if($is_online > 0 || $is_chat == 'true') {
-         if($is_online == 100) {
-            $check_friendship = mysql_query('SELECT is_online FROM ' . SQL_PREFIX . 'users WHERE username IN(SELECT user FROM ' . SQL_PREFIX . 'buddylists WHERE user=\'' . strtolower($to) . '\' AND buddy=\'' . mysql_real_escape_string($this->username) . '\')');
-            if(mysql_num_rows($check_friendship) == 0)
-               return 'not_online';
-         }
-
-         $check_blocked = mysql_query('SELECT id FROM ' . SQL_PREFIX . 'blocklists WHERE user=\'' . strtolower($to) . '\' AND buddy=\'' . mysql_real_escape_string($this->username) . '\'');
-         if(mysql_num_rows($check_blocked) > 0)
-            return 'not_online';
-
-         $check_blocked = mysql_query('SELECT id FROM ' . SQL_PREFIX . 'blocklists WHERE buddy=\'' . strtolower($to) . '\' AND user=\'' . mysql_real_escape_string($this->username) . '\'');
-         if(mysql_num_rows($check_blocked) > 0)
-            return 'not_online';
-
-         if(strlen(trim($message)) > 0 && strlen($message) <= 1500) {
-            $message = ('<span style="font-family:' . mysql_real_escape_string($font) . ',sans-serif;font-size:' . mysql_real_escape_string($font_size > 24 ? 24 : $font_size) . 'px;color:' . mysql_real_escape_string($font_color) . ';">') .
-                       ($bold == 'true' ? '<b>' : '') . ($italic == 'true' ? '<i>' : '') . ($underline == 'true' ? '<u>' : '') .
-                       $message .
-                       ($bold == 'true' ? '</b>' : '') . ($italic == 'true' ? '</i>' : '') . ($underline == 'true' ? '</u>' : '') .
-                       ('</span>');
-                       
-            if($is_chat == 'true') {
-               $where_to_send = $this->getChatlist($to);
-               
-               $to_insert = '';
-               foreach($where_to_send as $username)
-                  if($username != $this->username) $to_insert .= "('" . mysql_real_escape_string($message) . "', 'chatmsg', '" . $to . '.' . mysql_real_escape_string($this->username) . "', '" . strtolower($username) . "', " . time() . "),";
-                  
-               $to_insert = substr($to_insert, 0, strlen($to_insert) - 1);
-            } else {
-               $to_insert = "('" . mysql_real_escape_string($message) . "', 'msg', '" . mysql_real_escape_string($this->username) . "', '" . strtolower($to) . "', " . time() . ")";
-            }
-            
-            $query = mysql_query('INSERT INTO ' . SQL_PREFIX . 'messages (message, type, sender, recipient, stamp) VALUES ' . $to_insert);
-         } else {
-            if(strlen($message) > 1500)
-               return 'too_long';
-         }
-         
-         return 'sent';
+      if (yim_send_message($to, $message)) {
+        return 'sent';
       } else {
-         return 'not_online';
+        return 'not sent';
       }
+
    }
    
    /**
