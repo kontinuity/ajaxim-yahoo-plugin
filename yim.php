@@ -3,9 +3,6 @@ require('globals.php');
 require('oauth_helper.php');
 require('yim_helper.php');
 
-$username = 'directidev@yahoo.com';
-$password = 'qwedsa';
-
 function yim_get_buddy_list() {
   
 }
