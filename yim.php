@@ -88,7 +88,7 @@ function yim_create_session() {
   $query_param_string = oauth_http_build_query($params);
   $url = $url . '?' . $query_param_string;
   $headers = array();
-  $headers[0] = 'Content-Type: application/json;charset=utf-8';
+  $headers[] = 'Content-Type: application/json;charset=utf-8';
     
   $response = do_post($url, '{}', 80, $headers);
   yim_fail_if_not_ok($response, 'Could not create session');
